@@ -16,6 +16,11 @@ def generate_voucher():
 	print request.form
 	return "success"
 
+@app.route("/check_in_voucher", methods=["POST"])
+def check_in_voucher():
+	print request.form
+	return "success"
+
 def ccc_admin():
 	return
 

@@ -23,7 +23,51 @@
 	var start;
 	var end;
 	$(document).ready(function() {
+		function clearInputFields() {
+			$("input").each(function() {
+				$(this).val("");
+			});
+		}
+
 		$('#apt-date').datepicker();
+
+		var showCreateVoucher = true;
+
+		$("#view-toggle").click(function() {
+			showCreateVoucher = !showCreateVoucher;
+
+			if (showCreateVoucher) {
+				$("#check-in-voucher-container").toggle(false);
+				$("#create-voucher-container").toggle(true);
+				$("#view-toggle").text("Check-In Voucher");
+			} else {
+				$("#create-voucher-container").toggle(false);
+				$("#check-in-voucher-container").toggle(true);
+				$("#view-toggle").text("Create Voucher");
+			}
+		});
+
+		$("#check-in-voucher-btn").click(function() {
+			var data = {
+				"first_name": $("#first-name-2").val(),
+				"last_name": $("#last-name-2").val()
+			}
+
+			$.ajax({
+				url: "/check_in_voucher",
+				method: "POST",
+				data: data,
+				success: function(res) {
+					console.log("success");
+					console.log(res);
+					clearInputFields();
+				},
+				error: function(res) {
+					console.log("error");
+					console.log(res);
+				}
+			})
+		});
 
 		$("#generate-voucher-btn").click(function() {
 			console.log("start");
@@ -34,7 +78,7 @@
 
 			var data = {
 			    'first_name' : $("#first-name").val(),
-			    'last_name' : $("#first-name").val(),
+			    'last_name' : $("#last-name").val(),
 			    'apt_date' : $("#apt-date").val(),
 			    'start_loc' :
 			    	{
@@ -51,10 +95,10 @@
 				url: "/generate_voucher",
 				method: "POST",
 				data: data,
-				// contentType: 'application/json;charset=UTF-8',
 				success: function(res) {
 					console.log("success");
 					console.log(res);
+					clearInputFields();
 				},
 				error: function(res) {
 					console.log("error");
@@ -127,29 +171,45 @@
         async defer></script>
 
 <body>
-	<h1>Healthcare Rides</h1>
-	<div style="display: flex; justify-content: center;">
-		<div>
-			<h1>Create Voucher</h1>
-			<label>First Name</label>
-			<input id="first-name" style="width: 250px;" class="form-control"/>
-			<br/>
-			<label>Last Name</label>
-			<input id="last-name" style="width: 250px;" class="form-control"/>
-			<br/>
-			<label>Appointment Date</label>
-			<br/>
-			<input id='apt-date' style="width: 250px;" class="form-control"/>
-			<br/>
-			<label>Pick Up Address</label>
-			<br/>
-			<input style="width: 400px;" class="form-control" id="pick-up-address"/>
-			<br/>
-			<label>Drop Off Address</label>
-			<br/>
-			<input style="width: 400px;" class="form-control" id="drop-off-address"/>
-			<br/><br/>
-			<button id="generate-voucher-btn" class="btn-primary btn btn-block">Generate Voucher</button>
+	<div class="container-fluid" style="padding: 0px;">
+		<div style="background-color: #337ab7; height: 50px;">
+			<h1 style="padding: 0px; margin: 0px; padding-top: 5px; margin-left: 10px; color: white;">Healthcare Rides</h1>
+		</div>
+		<button class="btn btn-success" style="float: right; margin-top: -42px; margin-right: 20px;" id="view-toggle">Check-In Voucher</button>
+		<div style="display: flex; justify-content: center;">
+			<div id="create-voucher-container" style="margin-top: 30px;">
+				<h1>Create Voucher</h1>
+				<label style="margin-top: 20px;" >First Name</label>
+				<input id="first-name" style="width: 250px;" class="form-control"/>
+				<br/>
+				<label>Last Name</label>
+				<input id="last-name" style="width: 250px;" class="form-control"/>
+				<br/>
+				<label>Appointment Date</label>
+				<br/>
+				<input id='apt-date' style="width: 250px;" class="form-control"/>
+				<br/>
+				<label>Pick Up Address</label>
+				<br/>
+				<input style="width: 400px;" class="form-control" id="pick-up-address"/>
+				<br/>
+				<label>Drop Off Address</label>
+				<br/>
+				<input style="width: 400px;" class="form-control" id="drop-off-address"/>
+				<br/><br/>
+				<button id="generate-voucher-btn" class="btn-primary btn btn-block">Create Voucher</button>
+			</div>
+			<div id="check-in-voucher-container" style="display: none; margin-top: 30px;">
+				<h1>Check-In Voucher</h1>
+				<label style="margin-top: 20px;">First Name</label>
+				<input id="first-name-2" style="width: 250px;" class="form-control"/>
+				<br/>
+				<label>Last Name</label>
+				<input id="last-name-2" style="width: 250px;" class="form-control"/>
+				<br/>
+				<br/>
+				<button style="width: 250px;" class="btn btn-primary btn-block" id="check-in-voucher-btn">Check-In</button>
+			</div>
 		</div>
 	</div>
 </body>
