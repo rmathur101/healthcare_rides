@@ -1,6 +1,8 @@
 import string
 from random import SystemRandom
 
+from geopy.distance import vincenty
+
 from app import app
 from models import Voucher
 
@@ -13,3 +15,9 @@ def generate_voucher_code():
         if Voucher.query.filter_by(code=code).first():
             continue
         return code
+
+def verify_ride_destination(ride):
+    dropoff = (ride.dropoff_lat, ride.dropoff_long)
+    hcf_location = (ride.voucher.appointment.healthcare_facility.lat, ride.voucher.appointment.healthcare_facility.long)
+
+    return vincenty(dropoff, hcf_location).feet <= app.config['GOOD_DROPOFF_DISTANCE']

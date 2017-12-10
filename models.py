@@ -10,10 +10,14 @@ patient_healthcare_facilities = db.Table(
 class Patient(db.Model):
     __tablename__ = 'patients'
     id = db.Column(db.Integer, primary_key=True)
+    first_name = db.Column(db.String(30), nullable=False)
+    last_name = db.Column(db.String(50), nullable=False)
+    phone_number = db.Column(db.String(10), nullable=False)
     appointments = db.relationship('Appointment', backref='patient', lazy=False)
     healthcare_facilities = db.relationship('HealthcareFacility', secondary=patient_healthcare_facilities, lazy=True)
     rides = db.relationship('Ride', backref='patient', lazy=True)
-    #home = some geoloc
+    home_lat = db.Column(db.Float, nullable=False)
+    home_long = db.Column(db.Float, nullable=False)
 
 class HealthcareFacility(db.Model):
     __tablename__ = 'healthcare_facilities'
@@ -21,7 +25,8 @@ class HealthcareFacility(db.Model):
     name = db.Column(db.String(150), unique=True, nullable=False)
     patients = db.relationship('Patient', secondary=patient_healthcare_facilities, lazy=True)
     appointments = db.relationship('Appointment', backref='healthcare_facility', lazy=True)
-    #location = some geoloc
+    lat = db.Column(db.Float, nullable=False)
+    long = db.Column(db.Float, nullable=False)
 
 class Appointment(db.Model):
     __tablename__ = 'appointments'
@@ -48,6 +53,7 @@ class Ride(db.Model):
     #driver = some foreign key to the driver?
     ride_status = db.Column(db.Integer, nullable=False)
     #pickup = some geoloc
-    #dropoff = some geoloc
+    dropoff_lat = db.Column(db.Float, nullable=False)
+    dropoff_long = db.Column(db.Float, nullable=False)
     cost = db.Column(db.Float, nullable=True)
     payment_status = db.Column(db.Integer, nullable=False)

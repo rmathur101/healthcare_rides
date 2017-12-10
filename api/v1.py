@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+import logging
 
 from flask import jsonify, request
 
@@ -7,27 +8,29 @@ from models import Appointment, Patient, HealthcareFacility, Voucher
 import statuses
 from utils import generate_voucher_code
 
+logger = logging.getLogger(__name__)
+
 @app.route('/api/v1/create_patient/', methods=['POST'])
 def create_patient():
     db.session.add(Patient())
     db.session.commit()
-    return 'ok', 200
+    return '', 200
 
 @app.route('/api/v1/appointments/', methods=['GET'])
 def get_appointments():
-    patient = request.form['patient']
-    hcf = request.form['healthcare_facility']
+    patient = request.args.get('patient')
+    hcf = request.args.get('healthcare_facility')
     six_hours_ago = datetime.now() - timedelta(hours=6)
     six_hours_ahead = datetime.now() + timedelta(hours=6)
 
-    appts = Appointment.query.filter(
+    appts = [appt.__dict__ for appt in Appointment.query.filter(
         Appointment.patient_id == patient,
         Appointment.healthcare_facility_id == hcf,
         Appointment.datetime < six_hours_ahead,
         Appointment.datetime > six_hours_ago
-    ).all()
+    ).all()]
 
-    return jsonify(appts), 200
+    return repr(appts), 200
 
 @app.route('/api/v1/checkin/', methods=['POST'])
 def patient_checkin():
