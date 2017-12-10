@@ -18,10 +18,21 @@ def create_patient():
 
 @app.route('/api/v1/list_vouchers/', methods=['GET'])
 def list_vouchers():
-    vouchers = Voucher.query.all()
-    vouchers = [voucher.__dict__ for voucher in vouchers]
-    for voucher in vouchers:
+    vouchers_qs = Voucher.query.all()
+    vouchers = []
+    for voucher in vouchers_qs:
+        ride = None
+        if voucher.ride:
+            ride = voucher.ride.__dict__
+            ride.pop('_sa_instance_state')
+        voucher = voucher.__dict__
         voucher.pop('_sa_instance_state')
+        appt_id = voucher.pop('appointment_id')
+        appt = Appointment.query.get(appt_id).__dict__
+        appt.pop('_sa_instance_state')
+        voucher['appointment'] = appt
+        voucher['ride'] = ride
+        vouchers.append(voucher)
 
     return jsonify(vouchers), 200
 

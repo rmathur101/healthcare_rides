@@ -42,7 +42,7 @@ class Voucher(db.Model):
     __tablename__ = 'vouchers'
     id = db.Column(db.Integer, primary_key=True)
     appointment_id = db.Column(db.Integer, db.ForeignKey('appointments.id'), nullable=False)
-    ride = db.relationship('Ride', backref='voucher', lazy=True)
+    ride = db.relationship('Ride', backref='voucher', lazy=True, uselist=False)
     status = db.Column(db.Integer, nullable=False)
     code = db.Column(db.String(20))
 
@@ -54,6 +54,8 @@ class Ride(db.Model):
     #driver = some foreign key to the driver?
     ride_status = db.Column(db.Integer, nullable=False)
     #pickup = some geoloc
+    pickup_lat = db.Column(db.Float, nullable=False)
+    pickup_long = db.Column(db.Float, nullable=False)
     dropoff_lat = db.Column(db.Float, nullable=False)
     dropoff_long = db.Column(db.Float, nullable=False)
     cost = db.Column(db.Float, nullable=True)
