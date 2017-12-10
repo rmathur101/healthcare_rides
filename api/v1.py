@@ -40,7 +40,9 @@ def create_patient():
 
     db.session.add(new_patient)
     db.session.commit()
-    return jsonify(new_patient.__dict__), 201
+    patient = new_patient.__dict__
+    patient.pop('_sa_instance_state')
+    return jsonify(patient), 201
 
 @app.route('/api/v1/list_vouchers/', methods=['GET'])
 def list_vouchers():
@@ -58,6 +60,7 @@ def list_vouchers():
         appt.pop('_sa_instance_state')
         voucher['appointment'] = appt
         voucher['ride'] = ride
+        voucher['status'] = statuses.VOUCHER_CODES[voucher['status']]
         vouchers.append(voucher)
 
     return jsonify(vouchers), 200
