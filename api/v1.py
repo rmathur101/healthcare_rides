@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 import logging
 
 from flask import jsonify, request
+from geopy.geocoders import Nominatim
 
 from app import app, db
 from models import Appointment, Patient, HealthcareFacility, Voucher
@@ -12,16 +13,48 @@ logger = logging.getLogger(__name__)
 
 @app.route('/api/v1/create_patient/', methods=['POST'])
 def create_patient():
-    db.session.add(Patient())
+    first_name = request.form['first_name']
+    last_name = request.form['last_name'],
+    phone_number = request.form['phone_number']
+    geolocator = Nominatim()
+
+    address = '{street_address}, {city}, {state} {zip}'.format(
+        street_address=request.form['street_address'],
+        city=request.form['city'],
+        state=request.form['state'],
+        zip=request.form['zip'],
+    )
+
+    location = geolocator.geocode(address)
+    new_patient = Patient(
+        first_name=first_name,
+        last_name=last_name,
+        phone_number=phone_number,
+        home_lat=location.latitude,
+        home_long=location.longitude,
+    )
+
+    db.session.add(new_patient)
     db.session.commit()
-    return '', 200
+    return jsonify(new_patient.__dict__), 201
 
 @app.route('/api/v1/list_vouchers/', methods=['GET'])
 def list_vouchers():
-    vouchers = Voucher.query.all()
-    vouchers = [voucher.__dict__ for voucher in vouchers]
-    for voucher in vouchers:
+    vouchers_qs = Voucher.query.all()
+    vouchers = []
+    for voucher in vouchers_qs:
+        ride = None
+        if voucher.ride:
+            ride = voucher.ride.__dict__
+            ride.pop('_sa_instance_state')
+        voucher = voucher.__dict__
         voucher.pop('_sa_instance_state')
+        appt_id = voucher.pop('appointment_id')
+        appt = Appointment.query.get(appt_id).__dict__
+        appt.pop('_sa_instance_state')
+        voucher['appointment'] = appt
+        voucher['ride'] = ride
+        vouchers.append(voucher)
 
     return jsonify(vouchers), 200
 
