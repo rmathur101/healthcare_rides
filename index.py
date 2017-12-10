@@ -1,6 +1,5 @@
 from flask import Flask, url_for, render_template, request
-app = Flask(__name__)
-app.debug = True
+from app import app
 
 # url_for('static', filename='index.html')
 @app.route('/')
