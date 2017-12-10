@@ -4,9 +4,9 @@ PATIENT_CHECKED_IN = 1
 APPOINTMENT_FINISHED = 2
 
 APPOINTMENT_CODES = {
-    0: 'Appointment scheduled',
+    0: 'Scheduled',
     1: 'Patient checked-in',
-    2: 'Appointment finished',
+    2: 'Completed',
 }
 
 # Voucher statuses
@@ -15,9 +15,9 @@ VOUCHER_USED = 1
 VOUCHER_PAID = 2
 
 VOUCHER_CODES = {
-    0: 'Voucher created',
-    1: 'Voucher used',
-    2: 'Voucher paid',
+    0: 'Created',
+    1: 'Used',
+    2: 'Paid',
 }
 
 # Ride statuses
@@ -26,15 +26,15 @@ RIDE_IN_TRANSIT = 1
 RIDE_COMPLETED = 2
 
 RIDE_CODES = {
-    0: 'Ride initiated',
-    1: 'Ride in transit',
-    2: 'Ride completed',
+    0: 'Initiated',
+    1: 'In transit',
+    2: 'Completed',
 }
 
 PAYMENT_PENDING = 0
 PAYMENT_COMPLETED = 1
 
 PAYMENT_CODES = {
-    0: 'Payment pending',
-    1: 'Payment completed',
+    0: 'Pending',
+    1: 'Completed',
 }
