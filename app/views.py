@@ -14,10 +14,10 @@ def clinic():
 def dashboard():
 	return render_template("dashboard.html")
 
-@app.route("/generate_voucher", methods=["POST"])
-def generate_voucher():
-	print request.form
-	return "success"
+# @app.route("/generate_voucher", methods=["POST"])
+# def generate_voucher():
+# 	print request.form
+# 	return "success"
 
 @app.route("/check_in_voucher", methods=["POST"])
 def check_in_voucher():
