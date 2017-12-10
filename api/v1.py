@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 import logging
 
 from flask import jsonify, request
+from geopy.geocoders import Nominatim
 
 from app import app, db
 from models import Appointment, Patient, HealthcareFacility, Voucher
@@ -12,9 +13,30 @@ logger = logging.getLogger(__name__)
 
 @app.route('/api/v1/create_patient/', methods=['POST'])
 def create_patient():
-    db.session.add(Patient())
+    first_name = request.form['first_name']
+    last_name = request.form['last_name'],
+    phone_number = request.form['phone_number']
+    geolocator = Nominatim()
+
+    address = '{street_address}, {city}, {state} {zip}'.format(
+        street_address=request.form['street_address'],
+        city=request.form['city'],
+        state=request.form['state'],
+        zip=request.form['zip'],
+    )
+
+    location = geolocator.geocode(address)
+    new_patient = Patient(
+        first_name=first_name,
+        last_name=last_name,
+        phone_number=phone_number,
+        home_lat=location.latitude,
+        home_long=location.longitude,
+    )
+
+    db.session.add(new_patient)
     db.session.commit()
-    return '', 200
+    return jsonify(new_patient.__dict__), 201
 
 @app.route('/api/v1/list_vouchers/', methods=['GET'])
 def list_vouchers():
