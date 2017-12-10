@@ -11,6 +11,10 @@ def root():
 def clinic():
 	return render_template("clinic.html")
 
+@app.route('/dashboard')
+def dashboard():
+	return render_template("dashboard.html")
+
 @app.route("/generate_voucher", methods=["POST"])
 def generate_voucher():
 	print request.form

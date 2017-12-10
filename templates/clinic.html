@@ -14,15 +14,21 @@
 	<!-- bootstrap js -->
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 
-	<!-- Google Place API -->
-<!-- 	<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAJTpgPlUswSI_etrRyWspHWcTmgrcnsZY&libraries=places"></script>
- -->
+    <!-- leaflet -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.2.0/dist/leaflet.css"
+    integrity="sha512-M2wvCLH6DSRazYeZRIm1JnYyh22purTM+FDB5CsyxtQJYeKq83arPe5wgbNmcFXGqiSH2XR8dT/fJISVA1r/zQ=="
+    crossorigin=""/>
+
+    <script src="https://unpkg.com/leaflet@1.2.0/dist/leaflet.js"
+    integrity="sha512-lInM/apFSqyy1o6s89K4iQUKg6ppXEgsVxT35HbzUupEVRh2Eu9Wdl4tHj7dZO0s1uvplcYGmt3498TtHq+log=="
+    crossorigin=""></script>
 </head>
 
 <script type="text/javascript">
 	var start;
 	var end;
 	$(document).ready(function() {
+
 		function clearInputFields() {
 			$("input").each(function() {
 				$(this).val("");
@@ -39,7 +45,7 @@
 			if (showCreateVoucher) {
 				$("#check-in-voucher-container").toggle(false);
 				$("#create-voucher-container").toggle(true);
-				$("#view-toggle").text("Check-In Voucher");
+				$("#view-toggle").text("Check-In");
 			} else {
 				$("#create-voucher-container").toggle(false);
 				$("#check-in-voucher-container").toggle(true);
@@ -50,7 +56,8 @@
 		$("#check-in-voucher-btn").click(function() {
 			var data = {
 				"first_name": $("#first-name-2").val(),
-				"last_name": $("#last-name-2").val()
+				"last_name": $("#last-name-2").val(),
+				"phone_number": $("#phone-number-2").val()
 			}
 
 			$.ajax({
@@ -79,6 +86,7 @@
 			var data = {
 			    'first_name' : $("#first-name").val(),
 			    'last_name' : $("#last-name").val(),
+			    'phone_number' : $("#phone-number").val(),
 			    'apt_date' : $("#apt-date").val(),
 			    'start_loc' :
 			    	{
@@ -175,7 +183,7 @@
 		<div style="background-color: #337ab7; height: 50px;">
 			<h1 style="padding: 0px; margin: 0px; padding-top: 5px; margin-left: 10px; color: white;">Healthcare Rides</h1>
 		</div>
-		<button class="btn btn-success" style="float: right; margin-top: -42px; margin-right: 20px;" id="view-toggle">Check-In Voucher</button>
+		<button class="btn btn-success" style="float: right; margin-top: -42px; margin-right: 20px;" id="view-toggle">Check-In</button>
 		<div style="display: flex; justify-content: center;">
 			<div id="create-voucher-container" style="margin-top: 30px;">
 				<h1>Create Voucher</h1>
@@ -184,6 +192,9 @@
 				<br/>
 				<label>Last Name</label>
 				<input id="last-name" style="width: 250px;" class="form-control"/>
+				<br/>
+				<label>Telephone Number</label>
+				<input id="phone-number" style="width: 250px;" class="form-control"/>
 				<br/>
 				<label>Appointment Date</label>
 				<br/>
@@ -200,13 +211,23 @@
 				<button id="generate-voucher-btn" class="btn-primary btn btn-block">Create Voucher</button>
 			</div>
 			<div id="check-in-voucher-container" style="display: none; margin-top: 30px;">
-				<h1>Check-In Voucher</h1>
+				<h1>Patient Check-In</h1>
 				<label style="margin-top: 20px;">First Name</label>
 				<input id="first-name-2" style="width: 250px;" class="form-control"/>
 				<br/>
 				<label>Last Name</label>
 				<input id="last-name-2" style="width: 250px;" class="form-control"/>
+				<label>Telephone Number</label>
+				<input id="phone-number-2" style="width: 250px;" class="form-control"/>
 				<br/>
+				<label>Patient ID</label>
+				<input id="patient-id" style="width: 250px;" class="form-control"/>
+				<br/>
+<!-- 				<div style="border: 1px solid black;">
+					<label>Voucher Code</label>
+					<input id="voucher-code" style="width: 250px;" class="form-control"/>
+				<div/>
+ -->
 				<br/>
 				<button style="width: 250px;" class="btn btn-primary btn-block" id="check-in-voucher-btn">Check-In</button>
 			</div>
