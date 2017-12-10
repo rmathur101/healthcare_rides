@@ -23,18 +23,22 @@ VOUCHER_CODES = {
 # Ride statuses
 RIDE_INITIATED = 0
 RIDE_IN_TRANSIT = 1
-RIDE_COMPLETED = 2
+RIDE_COMPLETED_GOOD_STANDING = 2
+RIDE_COMPLETED_BAD_STANDING = 3
 
 RIDE_CODES = {
     0: 'Initiated',
     1: 'In transit',
-    2: 'Completed',
+    2: 'Completed in good standing',
+    3: 'Completed in bad standing',
 }
 
 PAYMENT_PENDING = 0
 PAYMENT_COMPLETED = 1
+PAYMENT_REFUSED = 2
 
 PAYMENT_CODES = {
     0: 'Pending',
     1: 'Completed',
+    2: 'Refused',
 }

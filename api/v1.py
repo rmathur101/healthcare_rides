@@ -70,7 +70,7 @@ def generate_voucher():
     patient = Patient.query.filter_by(
         first_name=request.form['first_name'],
         last_name=request.form['last_name'],
-        phone_number=request.form['phone_number']
+        phone_number=request.form['phone_number'],
     ).first()
 
     if 'healthcare_facility' in request.form:
@@ -85,12 +85,13 @@ def generate_voucher():
         return jsonify(response), 404
 
     appt_date = datetime.strptime(request.form['apt_date'], '%m/%d/%Y')
+    appt_date = appt_date.replace(hour=datetime.now().hour, minute=datetime.now().minute)
 
-    if appt_date < datetime.now():
-        response = {
-            "message": "Appointments can't be scheduled in the past.",
-        }
-        return jsonify(response), 400
+    # if appt_date < datetime.now():
+    #     response = {
+    #         "message": "Appointments can't be scheduled in the past.",
+    #     }
+    #     return jsonify(response), 400
 
     appointment = Appointment(
         patient=patient,
@@ -99,13 +100,15 @@ def generate_voucher():
         status=statuses.APPOINTMENT_SCHEDULED,
     )
 
+    db.session.add(appointment)
+    db.session.commit()
+
     voucher = Voucher(
         appointment=appointment,
         code=generate_voucher_code(),
         status=statuses.VOUCHER_CREATED,
     )
 
-    db.session.add(appointment)
     db.session.add(voucher)
     db.session.commit()
 
@@ -161,8 +164,10 @@ def patient_check_in():
 
     if appt:
         appt.status = statuses.PATIENT_CHECKED_IN
-        appt.voucher.status = statuses.VOUCHER_USED
+        voucher = Voucher.query.filter_by(appointment=appt).first()
+        voucher.status = statuses.VOUCHER_USED
         db.session.add(appt)
+        db.session.add(voucher)
         db.session.commit()
         return jsonify({
             "message": "Patient succcessfully checked-in.",

@@ -31,7 +31,6 @@ pharmacy.patients.append(patientc)
 pharmacy.patients.append(jane)
 
 appta = Appointment(patient=patienta, healthcare_facility=hospitala, datetime=datetime.now(), status=statuses.APPOINTMENT_FINISHED)
-apptjane = Appointment(patient=jane, healthcare_facility=hospitala, datetime=datetime.now(), status=statuses.APPOINTMENT_FINISHED)
 apptb = Appointment(patient=patientb, healthcare_facility=hospitalb, datetime=datetime.now(), status=statuses.APPOINTMENT_FINISHED)
 apptc = Appointment(patient=patientb, healthcare_facility=pharmacy, datetime=datetime.now(), status=statuses.APPOINTMENT_SCHEDULED)
 apptd = Appointment(patient=patienta, healthcare_facility=pharmacy, datetime=datetime.now(), status=statuses.APPOINTMENT_SCHEDULED)
@@ -43,10 +42,10 @@ voucherc = Voucher(appointment=apptc, code=generate_voucher_code(), status=statu
 voucherd = Voucher(appointment=apptd, code=generate_voucher_code(), status=statuses.VOUCHER_CREATED)
 vouchere = Voucher(appointment=appte, code=generate_voucher_code(), status=statuses.VOUCHER_USED)
 
-ridea = Ride(patient=patienta, voucher=vouchera, ride_status=statuses.RIDE_COMPLETED, payment_status=statuses.PAYMENT_COMPLETED, dropoff_lat=30.29701, dropoff_long=-97.6960, cost=14.56, pickup_lat=30.503784, pickup_long=-97.746326)
-rideb = Ride(patient=patientb, voucher=voucherb, ride_status=statuses.RIDE_COMPLETED, payment_status=statuses.PAYMENT_PENDING, dropoff_lat=30.259, dropoff_long=-97.603, cost=19.07, pickup_lat=30.103784, pickup_long=-97.750326)
-ridec = Ride(patient=patientb, voucher=voucherc, ride_status=statuses.RIDE_COMPLETED, payment_status=statuses.PAYMENT_PENDING, dropoff_lat=30.35, dropoff_long=-97.8, cost=12.89, pickup_lat=30.353784, pickup_long=-97.741326)
-rided = Ride(patient=patientc, voucher=vouchere, ride_status=statuses.RIDE_COMPLETED, payment_status=statuses.PAYMENT_PENDING, dropoff_lat=30.259, dropoff_long=-97.603, cost=14.55, pickup_lat=30.403784, pickup_long=-97.738326)
+ridea = Ride(patient=patienta, voucher=vouchera, ride_status=statuses.RIDE_COMPLETED_GOOD_STANDING, payment_status=statuses.PAYMENT_COMPLETED, dropoff_lat=30.29701, dropoff_long=-97.6960, cost=14.56, pickup_lat=30.503784, pickup_long=-97.746326)
+rideb = Ride(patient=patientb, voucher=voucherb, ride_status=statuses.RIDE_COMPLETED_GOOD_STANDING, payment_status=statuses.PAYMENT_PENDING, dropoff_lat=30.259, dropoff_long=-97.603, cost=19.07, pickup_lat=30.103784, pickup_long=-97.750326)
+ridec = Ride(patient=patientb, voucher=voucherc, ride_status=statuses.RIDE_COMPLETED_GOOD_STANDING, payment_status=statuses.PAYMENT_PENDING, dropoff_lat=30.35, dropoff_long=-97.8, cost=12.89, pickup_lat=30.353784, pickup_long=-97.741326)
+rided = Ride(patient=patientc, voucher=vouchere, ride_status=statuses.RIDE_COMPLETED_GOOD_STANDING, payment_status=statuses.PAYMENT_PENDING, dropoff_lat=30.259, dropoff_long=-97.603, cost=14.55, pickup_lat=30.403784, pickup_long=-97.738326)
 
 # dropoff = (ridea.dropoff_lat, ridea.dropoff_long)
 # hcf_location = (ridea.voucher.appointment.healthcare_facility.lat, ridea.voucher.appointment.healthcare_facility.long)
