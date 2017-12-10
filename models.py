@@ -13,7 +13,7 @@ class Patient(db.Model):
     first_name = db.Column(db.String(30), nullable=False)
     last_name = db.Column(db.String(50), nullable=False)
     phone_number = db.Column(db.String(10), nullable=False)
-    appointments = db.relationship('Appointment', backref='patient', lazy=False)
+    appointments = db.relationship('Appointment', backref='patient', lazy='dynamic')
     healthcare_facilities = db.relationship('HealthcareFacility', secondary=patient_healthcare_facilities, lazy=True)
     rides = db.relationship('Ride', backref='patient', lazy=True)
     home_lat = db.Column(db.Float, nullable=False)

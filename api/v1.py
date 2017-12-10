@@ -11,6 +11,10 @@ from utils import generate_voucher_code
 
 logger = logging.getLogger(__name__)
 
+EARLY_BOUNDARY = datetime.now() - timedelta(hours=app.config['EARLY_APPOINTMENT_TIME_BOUNDARY'])
+LATE_BOUNDARY = datetime.now() + timedelta(hours=app.config['LATE_APPOINTMENT_TIME_BOUNDARY'])
+
+
 @app.route('/api/v1/create_patient/', methods=['POST'])
 def create_patient():
     first_name = request.form['first_name']
@@ -111,28 +115,56 @@ def generate_voucher():
 def get_appointments():
     patient = request.args.get('patient')
     hcf = request.args.get('healthcare_facility')
-    early_boundary = datetime.now() - timedelta(hours=app.config['EARLY_APPOINTMENT_TIME_BOUNDARY'])
-    late_boundary = datetime.now() + timedelta(hours=app.config['LATE_APPOINTMENT_TIME_BOUNDARY'])
 
-    appts = [appt.__dict__ for appt in Appointment.query.filter(
-        Appointment.patient_id == patient,
-        Appointment.healthcare_facility_id == hcf,
-        Appointment.datetime > early_boundary,
-        Appointment.datetime < late_boundary,
-    ).all()]
+    if patient:
+        appts_qs = Appointment.query.filter(
+            Appointment.patient_id == patient,
+            Appointment.healthcare_facility_id == hcf,
+            Appointment.datetime > EARLY_BOUNDARY,
+            Appointment.datetime < LATE_BOUNDARY,
+        ).all()
+    else:
+        appts_qs = Appointment.query.filter(
+            Appointment.healthcare_facility_id == hcf,
+            Appointment.datetime > EARLY_BOUNDARY,
+            Appointment.datetime < LATE_BOUNDARY,
+        ).all()
+
+    appts = [appt.__dict__ for appt in appts_qs]
 
     for appt in appts:
         appt.pop('_sa_instance_state')
 
     return jsonify(appts), 200
 
-@app.route('/api/v1/checkin/', methods=['POST'])
-def patient_checkin():
-    appt_id = request.form['appt']
+@app.route('/api/v1/check-in/', methods=['POST'])
+def patient_check_in():
+    patient = Patient.query.filter_by(
+        first_name=request.form['first_name'],
+        last_name=request.form['last_name'],
+        phone_number=request.form['phone_number']
+    ).first()
 
-    appt = Appointment.query.get(appt_id)
+    if 'healthcare_facility' in request.form:
+        hcf = HealthcareFacility.query.get(request.form['healthcare_facility'])
+    else:
+        hcf = HealthcareFacility.query.get(1)
+
+    appt = patient.appointments.filter(
+        Appointment.healthcare_facility == hcf,
+        Appointment.datetime > EARLY_BOUNDARY,
+        Appointment.datetime < LATE_BOUNDARY
+    ).first()
 
     if appt:
         appt.status = statuses.PATIENT_CHECKED_IN
+        appt.voucher.status = statuses.VOUCHER_USED
         db.session.add(appt)
         db.session.commit()
+        return jsonify({
+            "message": "Patient succcessfully checked-in.",
+        }), 200
+    else:
+        return jsonify({
+            "message": "No appointment found.",
+        }), 404
