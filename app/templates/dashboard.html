@@ -1,0 +1,209 @@
+<head>
+	<!-- jQuery -->
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+	<!-- jQuery UI -->
+	<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+	<!-- jQuery UI CSS -->
+	<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+
+	<!-- bootstrap css -->
+	<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+	<!-- bootstrap js -->
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+    <!-- leaflet -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.2.0/dist/leaflet.css"
+    integrity="sha512-M2wvCLH6DSRazYeZRIm1JnYyh22purTM+FDB5CsyxtQJYeKq83arPe5wgbNmcFXGqiSH2XR8dT/fJISVA1r/zQ=="
+    crossorigin=""/>
+
+    <script src="https://unpkg.com/leaflet@1.2.0/dist/leaflet.js"
+    integrity="sha512-lInM/apFSqyy1o6s89K4iQUKg6ppXEgsVxT35HbzUupEVRh2Eu9Wdl4tHj7dZO0s1uvplcYGmt3498TtHq+log=="
+    crossorigin=""></script>
+
+	<script type="text/javascript">
+		$(document).ready(function() {
+			var mymap = L.map('mapid').setView([30.310768, -97.674724], 11);
+			   L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
+			       attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
+			       maxZoom: 20,
+			       id: 'mapbox.streets',
+			       accessToken: 'pk.eyJ1Ijoicm1hdGh1cjEwMSIsImEiOiJjajg3a3I0cjIwb2lqMndtdGVtaWx1ZjZrIn0.iEel0XmzyrU4fz78lEQ3GQ'
+			   }).addTo(mymap);
+
+			var clinics = {
+				0: {
+					name: "Austin Resource Center for the Homeless",
+					address: "500 East Seventh Street",
+					city: "Austin",
+					state: "TX",
+					lng: -97.73749320000002,
+					lat: 30.2679088
+
+				},
+				1: {
+					name: "Ben White Dental Clinic",
+					address: "1221 W. Ben White, Suite 112B",
+					city: "Austin",
+					state: "TX",
+					lng: -97.77809639999998,
+					lat: 30.2679088
+				},
+				2: {
+					name: "Blackstock Family Health Center",
+					address: "1313 Red River St. Ste. 100",
+					city: "Austin",
+					state: "TX",
+					lng: -97.734644,
+					lat: 30.2742865
+				},
+				3: {
+					name: "David Powell Health Center",
+					address: "4614 N. IH 35",
+					city: "Austin",
+					state: "TX",
+					lng: -97.7135955,
+					lat: 30.3053058
+				},
+				4: {
+					name: "Del Valle Health Center",
+					address: "3518 FM 973",
+					city: "Del Valle",
+					state: "TX",
+					lng: -97.64220239999997,
+					lat: 30.1987984
+				},
+				5: {
+					name: "East Austin Health Center",
+					address: "211 Comal Street",
+					city: "Austin",
+					state: "TX",
+					lng: -97.7275315,
+					lat: 30.259565,
+					note: "NOT FOUND"
+				},
+				6: {
+					name: "Hancock Walk-in Care",
+					address: "1000 E. 41st Street, Ste. 925",
+					city: "Austin",
+					state: "TX",
+					lng: -97.71994089999998,
+					lat: 30.2998354,
+					note: "NOT FOUND"
+				},
+				7: {
+					name: "Integral Care Dove Springs",
+					address: "5015 South IH35, Ste. 200",
+					city: "Austin",
+					state: "TX",
+					lng: -97.7562034,
+					lat: 30.2034992,
+					not_found: true
+				},
+				8: {
+					name: "Manor Health Center",
+					address: "600 W. Carrie-Manor",
+					city: "Manor",
+					state: "TX",
+					lng: -97.56374900000003,
+					lat: 30.3402471
+				},
+				9: {
+					name: "North Central Health Center",
+					address: "1210 W. Braker Lane",
+					city: "Austin",
+					state: "TX",
+					lng: -97.6939539,
+					lat: 30.3856664
+				},
+				10: {
+					name: "Oak Hill Health Center",
+					address: "8656-A Hwy 71 West",
+					city: "Austin",
+					state: "TX",
+					lng: -97.89372600000002,
+					lat: 30.2516726
+				},
+				11: {
+					name: "Plfugerville Health Center",
+					address: "15822 Foothill Farms Loops",
+					city: "Plfugerville",
+					state: "TX",
+					lng: -97.65203919999999,
+					lat: 30.4490669
+				},
+				12: {
+					name: "Rosewood Zaragosa Health Center",
+					address: "2802 Webberville Road",
+					city: "Austin",
+					state: "TX",
+					lng: -97.71024399999999,
+					lat: 30.26490239999999
+				},
+				13: {
+					name: "Rundberg Health Center",
+					address: "825 E. Rundberg Lane",
+					city: "Austin",
+					state: "TX",
+					lng: -97.68689889999996,
+					lat: 30.35667059999999
+				},
+				14: {
+					name: "Sandra Joy Anderson Community Health & Wellness",
+					address: "1705 East 11th St.",
+					city: "Austin",
+					state: "TX",
+					lng: -97.72219640000003,
+					lat: 30.26641100000001
+				},
+				15: {
+					name: "South Austin Health Center",
+					address: "2529 South First Street",
+					city: "Austin",
+					state: "TX",
+					lng: -97.7607107,
+					lat: 30.2394837
+				},
+				16: {
+					name: "Southeast Health and Wellness Center",
+					address: "2901 Montopolis Drive",
+					city: "Austin",
+					state: "TX",
+					lng: -97.70969159999999,
+					lat: 30.21435009999999
+				},
+				17: {
+					name: "William Cannon Walk-in Care",
+					address: "6801 S IH35",
+					city: "Austin",
+					state: "TX",
+					lng: -97.77086070000001,
+					lat: 30.1876984
+				},
+				18: {
+					name: "Women's Health Center",
+					address: "1313 Red River",
+					city: "Austin",
+					state: "TX",
+					lng: -97.73465550000003,
+					lat: 30.274291
+				}
+			}
+       	 	var markers = new L.FeatureGroup();
+			for (var c in clinics) {
+				var clinicData = clinics[c];
+	            var marker = L.marker([clinicData.lat, clinicData.lng], {});
+	            markers.addLayer(marker)
+			}
+			mymap.addLayer(markers);
+
+		})
+	</script>
+</head>
+<body>
+	<div id="mapid" style="height: 650px; border: 2px solid black; margin-left: 20px; margin-right: 20px;">
+
+	</div>
+</body>

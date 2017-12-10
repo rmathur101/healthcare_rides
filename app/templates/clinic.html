@@ -1,0 +1,236 @@
+<head>
+	<!-- jQuery -->
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+	<!-- jQuery UI -->
+	<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+	<!-- jQuery UI CSS -->
+	<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+
+	<!-- bootstrap css -->
+	<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+	<!-- bootstrap js -->
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+    <!-- leaflet -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.2.0/dist/leaflet.css"
+    integrity="sha512-M2wvCLH6DSRazYeZRIm1JnYyh22purTM+FDB5CsyxtQJYeKq83arPe5wgbNmcFXGqiSH2XR8dT/fJISVA1r/zQ=="
+    crossorigin=""/>
+
+    <script src="https://unpkg.com/leaflet@1.2.0/dist/leaflet.js"
+    integrity="sha512-lInM/apFSqyy1o6s89K4iQUKg6ppXEgsVxT35HbzUupEVRh2Eu9Wdl4tHj7dZO0s1uvplcYGmt3498TtHq+log=="
+    crossorigin=""></script>
+</head>
+
+<script type="text/javascript">
+	var start;
+	var end;
+	$(document).ready(function() {
+
+		function clearInputFields() {
+			$("input").each(function() {
+				$(this).val("");
+			});
+		}
+
+		$('#apt-date').datepicker();
+
+		var showCreateVoucher = true;
+
+		$("#view-toggle").click(function() {
+			showCreateVoucher = !showCreateVoucher;
+
+			if (showCreateVoucher) {
+				$("#check-in-voucher-container").toggle(false);
+				$("#create-voucher-container").toggle(true);
+				$("#view-toggle").text("Check-In");
+			} else {
+				$("#create-voucher-container").toggle(false);
+				$("#check-in-voucher-container").toggle(true);
+				$("#view-toggle").text("Create Voucher");
+			}
+		});
+
+		$("#check-in-voucher-btn").click(function() {
+			var data = {
+				"first_name": $("#first-name-2").val(),
+				"last_name": $("#last-name-2").val(),
+				"phone_number": $("#phone-number-2").val()
+			}
+
+			$.ajax({
+				url: "/check_in_voucher",
+				method: "POST",
+				data: data,
+				success: function(res) {
+					console.log("success");
+					console.log(res);
+					clearInputFields();
+				},
+				error: function(res) {
+					console.log("error");
+					console.log(res);
+				}
+			})
+		});
+
+		$("#generate-voucher-btn").click(function() {
+			console.log("start");
+			console.log(start);
+
+			console.log("end");
+			console.log(end);
+
+			var data = {
+			    'first_name' : $("#first-name").val(),
+			    'last_name' : $("#last-name").val(),
+			    'phone_number' : $("#phone-number").val(),
+			    'apt_date' : $("#apt-date").val(),
+			    'start_loc' :
+			    	{
+			    		"lat": start.geometry.location.lat(),
+			    		"lng": start.geometry.location.lng()
+			    	},
+			    "end_loc" : {
+			    		"lat": end.geometry.location.lat(),
+			    		"lng": end.geometry.location.lng()
+			    	}
+			}
+
+			$.ajax({
+				url: "/generate_voucher",
+				method: "POST",
+				data: data,
+				success: function(res) {
+					console.log("success");
+					console.log(res);
+					clearInputFields();
+				},
+				error: function(res) {
+					console.log("error");
+					console.log(res);
+				}
+			})
+		});
+	});
+
+	function initMap() {
+		var input = document.getElementById('pick-up-address');
+		var input2 = document.getElementById('drop-off-address');
+
+		var autocomplete = new google.maps.places.Autocomplete(input);
+
+		var autocomplete2 = new google.maps.places.Autocomplete(input2);
+
+		autocomplete.addListener('place_changed', function() {
+		  var place = autocomplete.getPlace();
+		  start = place;
+
+		  console.log(place);
+		  console.log(place.geometry.location.lng());
+		  console.log(place.geometry.location.lat());
+
+		  if (!place.geometry) {
+		    window.alert("No details available for input: '" + place.name + "'");
+		    return;
+		  }
+
+		  var address = '';
+		  if (place.address_components) {
+		    address = [
+		      (place.address_components[0] && place.address_components[0].short_name || ''),
+		      (place.address_components[1] && place.address_components[1].short_name || ''),
+		      (place.address_components[2] && place.address_components[2].short_name || '')
+		    ].join(' ');
+		  }
+
+		  console.log("what is this address?");
+		  console.log(address);
+		});
+
+		autocomplete2.addListener('place_changed', function() {
+		  var place = autocomplete2.getPlace();
+		  end = place;
+
+		  if (!place.geometry) {
+		    window.alert("No details available for input: '" + place.name + "'");
+		    return;
+		  }
+
+		  var address = '';
+		  if (place.address_components) {
+		    address = [
+		      (place.address_components[0] && place.address_components[0].short_name || ''),
+		      (place.address_components[1] && place.address_components[1].short_name || ''),
+		      (place.address_components[2] && place.address_components[2].short_name || '')
+		    ].join(' ');
+		  }
+
+		  console.log("what is this address?");
+		  console.log(address);
+		});
+	}
+
+</script>
+
+ <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAJTpgPlUswSI_etrRyWspHWcTmgrcnsZY&libraries=places&callback=initMap"
+        async defer></script>
+
+<body>
+	<div class="container-fluid" style="padding: 0px;">
+		<div style="background-color: #337ab7; height: 50px;">
+			<h1 style="padding: 0px; margin: 0px; padding-top: 5px; margin-left: 10px; color: white;">Healthcare Rides</h1>
+		</div>
+		<button class="btn btn-success" style="float: right; margin-top: -42px; margin-right: 20px;" id="view-toggle">Check-In</button>
+		<div style="display: flex; justify-content: center;">
+			<div id="create-voucher-container" style="margin-top: 30px;">
+				<h1>Create Voucher</h1>
+				<label style="margin-top: 20px;" >First Name</label>
+				<input id="first-name" style="width: 250px;" class="form-control"/>
+				<br/>
+				<label>Last Name</label>
+				<input id="last-name" style="width: 250px;" class="form-control"/>
+				<br/>
+				<label>Telephone Number</label>
+				<input id="phone-number" style="width: 250px;" class="form-control"/>
+				<br/>
+				<label>Appointment Date</label>
+				<br/>
+				<input id='apt-date' style="width: 250px;" class="form-control"/>
+				<br/>
+				<label>Pick Up Address</label>
+				<br/>
+				<input style="width: 400px;" class="form-control" id="pick-up-address"/>
+				<br/>
+				<label>Drop Off Address</label>
+				<br/>
+				<input style="width: 400px;" class="form-control" id="drop-off-address"/>
+				<br/><br/>
+				<button id="generate-voucher-btn" class="btn-primary btn btn-block">Create Voucher</button>
+			</div>
+			<div id="check-in-voucher-container" style="display: none; margin-top: 30px;">
+				<h1>Patient Check-In</h1>
+				<label style="margin-top: 20px;">First Name</label>
+				<input id="first-name-2" style="width: 250px;" class="form-control"/>
+				<br/>
+				<label>Last Name</label>
+				<input id="last-name-2" style="width: 250px;" class="form-control"/>
+				<label>Telephone Number</label>
+				<input id="phone-number-2" style="width: 250px;" class="form-control"/>
+				<br/>
+				<label>Patient ID</label>
+				<input id="patient-id" style="width: 250px;" class="form-control"/>
+				<br/>
+<!-- 				<div style="border: 1px solid black;">
+					<label>Voucher Code</label>
+					<input id="voucher-code" style="width: 250px;" class="form-control"/>
+				<div/>
+ -->
+				<br/>
+				<button style="width: 250px;" class="btn btn-primary btn-block" id="check-in-voucher-btn">Check-In</button>
+			</div>
+		</div>
+	</div>
+</body>
