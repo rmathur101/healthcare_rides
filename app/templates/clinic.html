@@ -97,10 +97,10 @@
 			    		"lat": end.geometry.location.lat(),
 			    		"lng": end.geometry.location.lng()
 			    	}
-			}
+			};
 
 			$.ajax({
-				url: "/generate_voucher",
+				url: "/api/v1/generate_voucher/",
 				method: "POST",
 				data: data,
 				success: function(res) {
@@ -171,6 +171,19 @@
 		  console.log("what is this address?");
 		  console.log(address);
 		});
+
+		function prepopulate() {
+// First name: Jane    Last Name: Patient      Telephone: 512-555-1234     Pick up address:   100 North Loop Blvd, Austin TX  Drop off Address: 211 Comal Street, Austin, TX
+			$("#first-name").val("Jane");
+			$("#last-name").val("Patient");
+			$("#phone-number").val("512-555-1234");
+			$("#apt-date").val();
+		    // 'first_name' : $("#first-name").val(),
+		    // 'last_name' : $("#last-name").val(),
+		    // 'phone_number' : $("#phone-number").val(),
+		    // 'apt_date' : $("#apt-date").val(),
+		}
+		prepopulate();
 	}
 
 </script>
@@ -186,7 +199,7 @@
 		<button class="btn btn-success" style="float: right; margin-top: -42px; margin-right: 20px;" id="view-toggle">Check-In</button>
 		<div style="display: flex; justify-content: center;">
 			<div id="create-voucher-container" style="margin-top: 30px;">
-				<h1>Create Voucher</h1>
+				<h1>Create Roundtrip Voucher</h1>
 				<label style="margin-top: 20px;" >First Name</label>
 				<input id="first-name" style="width: 250px;" class="form-control"/>
 				<br/>
@@ -209,6 +222,9 @@
 				<input style="width: 400px;" class="form-control" id="drop-off-address"/>
 				<br/><br/>
 				<button id="generate-voucher-btn" class="btn-primary btn btn-block">Create Voucher</button>
+				<div id="voucher-code-success">
+
+				</div>
 			</div>
 			<div id="check-in-voucher-container" style="display: none; margin-top: 30px;">
 				<h1>Patient Check-In</h1>
@@ -217,6 +233,7 @@
 				<br/>
 				<label>Last Name</label>
 				<input id="last-name-2" style="width: 250px;" class="form-control"/>
+				<br/>
 				<label>Telephone Number</label>
 				<input id="phone-number-2" style="width: 250px;" class="form-control"/>
 				<br/>
