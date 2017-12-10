@@ -97,10 +97,10 @@
 			    		"lat": end.geometry.location.lat(),
 			    		"lng": end.geometry.location.lng()
 			    	}
-			}
+			};
 
 			$.ajax({
-				url: "/generate_voucher",
+				url: "/api/v1/generate_voucher/",
 				method: "POST",
 				data: data,
 				success: function(res) {
