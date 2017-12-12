@@ -40,6 +40,13 @@
 		var showCreateVoucher = true;
 
 		$("#view-toggle").click(function() {
+
+			function prepopulate2() {
+				$("#first-name-2").val("Jane");
+				$("#last-name-2").val("Patient");
+				$("#phone-number-2").val("5125551234");
+				$("#patient-id").val("1234");
+			}
 			showCreateVoucher = !showCreateVoucher;
 
 			if (showCreateVoucher) {
@@ -50,6 +57,7 @@
 				$("#create-voucher-container").toggle(false);
 				$("#check-in-voucher-container").toggle(true);
 				$("#view-toggle").text("Create Voucher");
+				prepopulate2();
 			}
 		});
 
@@ -61,7 +69,7 @@
 			}
 
 			$.ajax({
-				url: "/check_in_voucher",
+				url: "/api/v1/check-in/",
 				method: "POST",
 				data: data,
 				success: function(res) {
@@ -106,6 +114,12 @@
 				success: function(res) {
 					console.log("success");
 					console.log(res);
+
+					$("#voucher-code-success").html(
+						`
+							<span style="color: green;">${res.message}: ${res.code}</span>
+						`
+					);
 					clearInputFields();
 				},
 				error: function(res) {
@@ -176,7 +190,7 @@
 // First name: Jane    Last Name: Patient      Telephone: 512-555-1234     Pick up address:   100 North Loop Blvd, Austin TX  Drop off Address: 211 Comal Street, Austin, TX
 			$("#first-name").val("Jane");
 			$("#last-name").val("Patient");
-			$("#phone-number").val("512-555-1234");
+			$("#phone-number").val("5125551234");
 			$("#apt-date").val();
 		    // 'first_name' : $("#first-name").val(),
 		    // 'last_name' : $("#last-name").val(),
@@ -184,6 +198,7 @@
 		    // 'apt_date' : $("#apt-date").val(),
 		}
 		prepopulate();
+
 	}
 
 </script>
@@ -222,7 +237,7 @@
 				<input style="width: 400px;" class="form-control" id="drop-off-address"/>
 				<br/><br/>
 				<button id="generate-voucher-btn" class="btn-primary btn btn-block">Create Voucher</button>
-				<div id="voucher-code-success">
+				<div style="margin-top: 10px;" id="voucher-code-success">
 
 				</div>
 			</div>

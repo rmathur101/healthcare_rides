@@ -199,11 +199,115 @@
 			}
 			mymap.addLayer(markers);
 
+			$.ajax({
+				url: "/api/v1/list_vouchers/",
+				method: "GET",
+				success: function(res) {
+					console.log(res);
+					displayVouchers(res);
+				}
+			})
+
+			var vouchers = [
+				{
+					"code": "DFS234SDF",
+					"appointment_date": "2017-10-10",
+					"status": "PENDING"
+				}
+			]
+
+			function displayVouchers(vouchers) {
+				for (var v in vouchers) {
+					var voucher = vouchers[v];
+					// $("#vouchers-container").append(
+					// 	`<div style="border: 1px solid black; background-color: #337ab7; color: white; width: 400px;">
+					// 		<span>Voucher Code: </span><span>${voucher.code}</span>
+					// 		<br/>
+					// 		<span>Appointment Date: </span><span>${voucher.appointment_date}</span>
+					// 		<br/>
+					// 		<span>Voucher Code: </span><span>${voucher.status}</span>
+					// 	</div>`
+					// );
+					if (voucher.code && voucher.appointment) {
+						if (voucher.ride) {
+							$("#vouchers-container > table > tbody").append(
+								`
+								<tr>
+							      <td>${voucher.code}</td>
+							      <td>${voucher.appointment.datetime}</td>
+							      <td>${voucher.status}</td>
+							      <td>$${voucher.ride.cost}</td>
+								</tr>
+								`
+							);
+						} else {
+							$("#vouchers-container > table > tbody").append(
+								`
+								<tr>
+							      <td>${voucher.code}</td>
+							      <td>${voucher.appointment.datetime}</td>
+							      <td>${voucher.status}</td>
+							      <td>"TBD"</td>
+								</tr>
+								`
+							);
+
+						}
+					}
+				}
+
+
+			}
+
+			// call from ajax once recieved vouchers from backend
+			displayVouchers(vouchers);
+
 		})
 	</script>
 </head>
 <body>
-	<div id="mapid" style="height: 650px; border: 2px solid black; margin-left: 20px; margin-right: 20px;">
+	<div>
+		<div style="background-color: #337ab7; height: 50px;">
+			<h1 style="padding: 0px; margin: 0px; padding-top: 5px; margin-left: 10px; color: white;">Healthcare Rides</h1>
+		</div>
+
+		<div id="vouchers-container" style="margin-top: 40px; float: left;">
+				<table class="table table-dark" style="width: 600px; margin-left: 20px;">
+					<thead style="background-color: #337ab7; color: white;">
+					    <tr>
+					      <th style="text-transform: uppercase; letter-spacing: 2;" scope="col">Voucher Code</th>
+					      <th style="text-transform: uppercase; letter-spacing: 2; scope="col">Appointment Date</th>
+					      <th style="text-transform: uppercase; letter-spacing: 2; scope="col">Status</th>
+					      <th style="text-transform: uppercase; letter-spacing: 2; scope="col">Cost</th>
+					    </tr>
+					  </thead>
+					  <tbody>
+	<!-- 				    <tr>
+					      <th scope="row">1</th>
+					      <td>Mark</td>
+					      <td>Otto</td>
+					      <td>@mdo</td>
+					    </tr>
+					    <tr>
+					      <th scope="row">2</th>
+					      <td>Jacob</td>
+					      <td>Thornton</td>
+					      <td>@fat</td>
+					    </tr>
+					    <tr>
+					      <th scope="row">3</th>
+					      <td>Larry</td>
+					      <td>the Bird</td>
+					      <td>@twitter</td>
+					    </tr>
+	 -->				  </tbody>
+				</table>
+		</div>
+
+		</div>
+	<div id="mapid" style="float: right; height: 450px; border: 2px solid #337ab7; margin-left: 20px; margin-top: 40px; margin-right: 20px; width: 700px;">
 
 	</div>
+	</div>
+
 </body>
