@@ -23,6 +23,22 @@
     integrity="sha512-lInM/apFSqyy1o6s89K4iQUKg6ppXEgsVxT35HbzUupEVRh2Eu9Wdl4tHj7dZO0s1uvplcYGmt3498TtHq+log=="
     crossorigin=""></script>
 
+    <!-- gcharts -->
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+
+    <!-- highscharts -->
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+	<script src="https://code.highcharts.com/modules/exporting.js"></script>
+
+    <!-- for color markers -->
+<!--     <script src="https://use.fontawesome.com/186244fe4f.js"></script>
+    <link rel="stylesheet" href="http://code.ionicframework.com/ionicons/1.5.2/css/ionicons.min.css">
+    <link rel="stylesheet" href="Leaflet.awesome-markers/dist/leaflet.awesome-markers.css ">
+    <script src="Leaflet.awesome-markers/dist/leaflet.awesome-markers.js"></script>
+ -->
+
+     <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA3L1dcWmGP3OA-koWsfmKsqVuYe6jFTDM&libraries=places,geometry" async defer></script>
+
 	<script type="text/javascript">
 		$(document).ready(function() {
 			var mymap = L.map('mapid').setView([30.310768, -97.674724], 11);
@@ -195,9 +211,20 @@
 			for (var c in clinics) {
 				var clinicData = clinics[c];
 	            var marker = L.marker([clinicData.lat, clinicData.lng], {});
-	            markers.addLayer(marker)
+	            marker.id = c;
+	            marker.on("click", markerOnClick);
+	            markers.addLayer(marker);
 			}
 			mymap.addLayer(markers);
+
+			// var latlngs = [
+			// 	[30.274291, -97.73465550000003],
+			// 	[30.1876984, -97.77086070000001]
+			// ]
+			// var polyline = L.polyline(latlngs, {color: 'red'}).addTo(mymap);
+			// mymap.fitBounds(polyline.getBounds());
+
+			var voucherList;
 
 			$.ajax({
 				url: "/api/v1/list_vouchers/",
@@ -205,6 +232,7 @@
 				success: function(res) {
 					console.log(res);
 					displayVouchers(res);
+					voucherList = res;
 				}
 			})
 
@@ -215,6 +243,35 @@
 					"status": "PENDING"
 				}
 			]
+
+			var polylines = [];
+
+			function calculateDistanceBetween(latLongA, latLongB) {
+			    var geometry = google.maps.geometry.spherical;
+			    var a = new google.maps.LatLng(
+			        {
+			            lat: latLongA[0],
+			            lng: latLongA[1]
+			        }
+			    );
+			    var b = new google.maps.LatLng({lat: latLongB[0], lng: latLongB[1]});
+			    var d = geometry.computeDistanceBetween(a, b);
+			    return d;
+			}
+
+			function markerOnClick() {
+				this.unbindPopup();
+
+				var id = parseInt(this.id);
+
+				var info = clinics[id];
+
+				var div = "";
+				div += info.name;
+
+				this.bindPopup(div);
+				this.openPopup();
+			}
 
 			function displayVouchers(vouchers) {
 				for (var v in vouchers) {
@@ -232,7 +289,7 @@
 						if (voucher.ride) {
 							$("#vouchers-container > table > tbody").append(
 								`
-								<tr>
+								<tr class="voucher-row" style="cursor: pointer;">
 							      <td>${voucher.code}</td>
 							      <td>${voucher.appointment.datetime}</td>
 							      <td>${voucher.status}</td>
@@ -243,7 +300,7 @@
 						} else {
 							$("#vouchers-container > table > tbody").append(
 								`
-								<tr>
+								<tr class="voucher-row" style="cursor: pointer;">
 							      <td>${voucher.code}</td>
 							      <td>${voucher.appointment.datetime}</td>
 							      <td>${voucher.status}</td>
@@ -256,14 +313,639 @@
 					}
 				}
 
+				$(".voucher-row").click(function() {
+					for (var p in polylines) {
+						var pp = polylines[p];
+						mymap.removeLayer(pp);
+					}
 
+					$(".voucher-row").each(function() {
+						$(this).css("background-color", "white");
+					})
+
+					$(this).css("background-color", "#5cb85c");
+
+					var code = $(this).find("td").first().text();
+
+					var this_v;
+					for (var v in voucherList) {
+						var vv = voucherList[v];
+						if (code == vv.code) {
+							this_v = vv;
+							break;
+						}
+					}
+
+					console.log("this v");
+					console.log(this_v);
+
+					 var latlngs = []
+
+					 var myIcon = L.divIcon({html: "<div style='width: 70px; height: 20px; color: white; background-color: red; border: 2px solid black; margin-left: -10px; margin-top: -5px; text-align: center;'>END</div>"});
+		            var marker = L.marker([this_v.ride.dropoff_lat, this_v.ride.dropoff_long], {icon: myIcon}).addTo(mymap);
+		            polylines.push(marker);
+
+					 var myIcon = L.divIcon({html: "<div style='width: 70px; height: 20px; color: white; background-color: green; border: 2px solid black; margin-left: -10px; margin-top: -5px; text-align: center;'>START</div>"});
+		            var marker = L.marker([this_v.ride.pickup_lat, this_v.ride.pickup_long], {icon: myIcon}).addTo(mymap);
+		            polylines.push(marker);
+
+					 latlngs.push([this_v.ride.pickup_lat, this_v.ride.pickup_long]);
+					 latlngs.push([this_v.ride.dropoff_lat, this_v.ride.dropoff_long]);
+
+					 console.log(latlngs);
+
+					// var distance = calculateDistanceBetween([this_v.ride.pickup_lat, this_v.ride.pickup_long], [this_v.ride.dropoff_lat, this_v.ride.dropoff_long]);
+					// console.log("does this get me anything?");
+					// console.log(distance);
+					// console.log(convertMetersToMiles(distance));
+
+
+					function isValidRide(latLong) {
+						function convertMetersToMiles(meters) {
+						    return meters / 1609.34;
+						}
+						for (var c in clinics) {
+							var obj = clinics[c];
+							var d = calculateDistanceBetween(latLong, [obj.lat, obj.lng]);
+							var m = convertMetersToMiles(d);
+							if (d < 3) {
+								return true;
+							}
+						}
+						return false;
+					}
+
+					console.log("valid ride?");
+					var valid = isValidRide([this_v.ride.dropoff_lat, this_v.ride.dropoff_long])
+					console.log(valid);
+					if (valid) {
+						$("#valid-sign").toggle(true);
+						$("#invalid-sign").toggle(false);
+					} else {
+						$("#valid-sign").toggle(false);
+						$("#invalid-sign").toggle(true);
+					}
+
+					 var polyline = L.polyline(latlngs, {color: 'red'}).addTo(mymap);
+
+					 polylines.push(polyline);
+
+					 mymap.fitBounds(polyline.getBounds());
+						});
 			}
 
 			// call from ajax once recieved vouchers from backend
 			displayVouchers(vouchers);
 
+			var showOther = true;
+			$("#analytics-btn").click(function() {
+				if (showOther) {
+					$("#analytics-btn").text("Vouchers");
+				} else {
+					$("#analytics-btn").text("Analytics");
+				}
+				showOther = !showOther;
+
+				$("#voucher-view").toggle();
+				$("#charts-view").toggle()
+			});
+
+
+			// function attachVoucherRowClick() {
+			// 	$(".voucher-row").click(function() {
+			// 		var code = $(".voucher-row > td").first().val();
+
+			// 		var this_v;
+			// 		for (var v in voucherList) {
+			// 			var vv = voucherList[v];
+			// 			if (code == vv.code) {
+			// 				this_v = vv;
+			// 				break;
+			// 			}
+			// 		}
+
+			// 		console.log("this v");
+			// 		console.log(this_v);
+			// 	});
+			// }
 		})
 	</script>
+    <script type="text/javascript">
+		// google.charts.load('current', {'packages':['corechart']});
+		// google.charts.setOnLoadCallback(drawChart);
+		// // google.charts.setOnLoadCallback(drawChart2);
+
+		// function drawChart() {
+		// 	var data = google.visualization.arrayToDataTable([
+		// 	  ['Month', 'Voucher Program', 'No Program'],
+		// 	  ['Aug.',  97, 85],
+		// 	  ['Sept.', 96, 81],
+		// 	  ['Oct.', 95, 94],
+		// 	  ['Nov.', 90, 84]
+		// 	]);
+
+		// 	var options = {
+		// 	  title: 'Appointment Attendance',
+		// 	  hAxis: {title: '2017',  titleTextStyle: {color: '#333'}},
+		// 	  vAxis: {minValue: 50, title: "Attendance Rate"},
+		// 	  height: 550,
+		// 	  width: 900
+		// 	};
+
+		// 	var chart = new google.visualization.AreaChart(document.getElementById('chart-1'));
+		// 	chart.draw(data, options);
+
+		// }
+
+		$(document).ready(function() {
+
+			Highcharts.chart('chart-1', {
+			    chart: {
+			        type: 'area'
+			    },
+			    title: {
+			        text: 'Appointment Attendance Rate (%)'
+			    },
+			    xAxis: {
+			        categories: ['Aug.', 'Sept.', 'Oct.', 'Nov.'],
+			        tickmarkPlacement: 'on',
+			        title: {
+			            enabled: false
+			        }
+			    },
+			    yAxis: {
+			        title: {
+			            text: 'Attendance Rate'
+			        },
+			        // labels: {
+			        //     formatter: function () {
+			        //         return this.value / 1000;
+			        //     }
+			        // }
+			    },
+			    tooltip: {
+			        split: true,
+			        valueSuffix: '%'
+			    },
+			    plotOptions: {
+			        area: {
+			            // stacking: 'normal',
+			            lineColor: '#666666',
+			            lineWidth: 1,
+			            marker: {
+			                lineWidth: 1,
+			                lineColor: '#666666'
+			            }
+			        }
+			    },
+			    series: [{
+			        name: 'Voucher Program',
+			        data: [97, 98, 96, 99 ]
+			    }, {
+			        name: 'No Voucher Program',
+			        data: [82, 87, 82, 88]
+			    }]
+			});
+
+		// 	Highcharts.chart('chart-3', {
+		//     chart: {
+		//         type: 'column'
+		//     },
+		//     title: {
+		//         text: 'Total Rides'
+		//     },
+		//     xAxis: {
+		//         categories: ['Aug.', 'Sept.', 'Oct.', 'Nov.']
+		//     },
+		//     yAxis: {
+		//         min: 0,
+		//         title: {
+		//             text: 'Total Rides'
+		//         },
+		//         stackLabels: {
+		//             enabled: true,
+		//             style: {
+		//                 fontWeight: 'bold',
+		//                 color: (Highcharts.theme && Highcharts.theme.textColor) || 'gray'
+		//             }
+		//         }
+		//     },
+		//     legend: {
+		//         align: 'right',
+		//         x: -30,
+		//         verticalAlign: 'top',
+		//         y: 25,
+		//         floating: true,
+		//         backgroundColor: (Highcharts.theme && Highcharts.theme.background2) || 'white',
+		//         borderColor: '#CCC',
+		//         borderWidth: 1,
+		//         shadow: false
+		//     },
+		//     tooltip: {
+		//         headerFormat: '<b>{point.x}</b><br/>',
+		//         pointFormat: '{series.name}: {point.y}<br/>Total: {point.stackTotal}'
+		//     },
+		//     plotOptions: {
+		//         column: {
+		//             stacking: 'normal',
+		//             dataLabels: {
+		//                 enabled: true,
+		//                 color: (Highcharts.theme && Highcharts.theme.dataLabelsColor) || 'white'
+		//             }
+		//         }
+		//     },
+		//     series: [{
+		//         name: 'Verified',
+		//         data: [190, 200, 201, 200]
+		//     }, {
+		//         name: 'Delinquent',
+		//         data: [1, 2, 3, 5]
+		//     }]
+		// });
+
+
+			Highcharts.chart('chart-4', {
+			    chart: {
+			        type: 'column'
+			    },
+			    title: {
+			        text: 'Issued Vouchers'
+			    },
+			    xAxis: {
+			        categories: ['Aug.', 'Sept.', 'Oct.', 'Nov.']
+			    },
+			    yAxis: {
+			        min: 0,
+			        title: {
+			            text: 'Number of Vouchers'
+			        },
+			        stackLabels: {
+			            enabled: true,
+			            style: {
+			                fontWeight: 'bold',
+			                color: (Highcharts.theme && Highcharts.theme.textColor) || 'gray'
+			            }
+			        }
+			    },
+			    legend: {
+			        align: 'right',
+			        x: -30,
+			        verticalAlign: 'top',
+			        y: 25,
+			        floating: true,
+			        backgroundColor: (Highcharts.theme && Highcharts.theme.background2) || 'white',
+			        borderColor: '#CCC',
+			        borderWidth: 1,
+			        shadow: false
+			    },
+			    tooltip: {
+			        headerFormat: '<b>{point.x}</b><br/>',
+			        pointFormat: '{series.name}: {point.y}<br/>Total: {point.stackTotal}'
+			    },
+			    plotOptions: {
+			        column: {
+			            stacking: 'normal',
+			            dataLabels: {
+			                enabled: true,
+			                color: (Highcharts.theme && Highcharts.theme.dataLabelsColor) || 'white'
+			            }
+			        }
+			    },
+			    series: [
+			    {
+			        name: 'Delinquent',
+			        data: [4, 2, 2, 1]
+			    },
+			    {
+			    	name: "Unused",
+			    	data: [150, 90, 72, 70]
+			    },
+			    {
+			        name: 'Verified',
+			        data: [210, 301, 305, 350]
+			    },
+			    ]
+			});
+
+			Highcharts.chart('chart-2', {
+			    chart: {
+			        type: 'column'
+			    },
+			    title: {
+			        text: 'Voucher Costs'
+			    },
+			    xAxis: {
+			        categories: ['Aug.', 'Sept.', 'Oct.', 'Nov.']
+			    },
+			    yAxis: {
+			        min: 0,
+			        title: {
+			            text: 'Cost ($)'
+			        },
+			        stackLabels: {
+			            enabled: true,
+			            style: {
+			                fontWeight: 'bold',
+			                color: (Highcharts.theme && Highcharts.theme.textColor) || 'gray'
+			            }
+			        }
+			    },
+			    legend: {
+			        align: 'right',
+			        x: -30,
+			        verticalAlign: 'top',
+			        y: 25,
+			        floating: true,
+			        backgroundColor: (Highcharts.theme && Highcharts.theme.background2) || 'white',
+			        borderColor: '#CCC',
+			        borderWidth: 1,
+			        shadow: false
+			    },
+			    tooltip: {
+			        headerFormat: '<b>{point.x}</b><br/>',
+			        pointFormat: '{series.name}: {point.y}<br/>Total: {point.stackTotal}'
+			    },
+			    plotOptions: {
+			        column: {
+			            stacking: 'normal',
+			            dataLabels: {
+			                enabled: true,
+			                color: (Highcharts.theme && Highcharts.theme.dataLabelsColor) || 'white'
+			            }
+			        }
+			    },
+			    series: [
+			    {
+			        name: 'Delinquent',
+			        data: [42, 25, 19, 10]
+			    },
+			    {
+			        name: 'Verified',
+			        data: [2042, 3453 , 3432, 3992]
+			    },
+			    ]
+			});
+
+
+
+// Create the chart
+Highcharts.chart('chart-3', {
+    chart: {
+        type: 'pie'
+    },
+    title: {
+        text: 'Issued Vouchers By Income Group'
+    },
+    plotOptions: {
+        series: {
+            dataLabels: {
+                enabled: true,
+                format: '{point.name}: {point.y:.1f}%'
+            }
+        }
+    },
+
+    tooltip: {
+        headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
+        pointFormat: '<span style="color:{point.color}">{point.name}</span>: <b>{point.y:.2f}%</b> of total<br/>'
+    },
+    series: [{
+        name: 'Income Brackets',
+        colorByPoint: true,
+        data: [{
+            name: 'Income Bracket 1',
+            y: 56.33,
+            drilldown: 'IE'
+        }, {
+            name: 'Income Bracket 2',
+            y: 24.03,
+            drilldown: 'Chrome'
+        }, {
+            name: 'Income Bracket 3',
+            y: 10.38,
+            drilldown: 'Firefox'
+        }, {
+            name: 'Income Bracket 4',
+            y: 4.77,
+            drilldown: 'Safari'
+        }, {
+            name: 'Income Bracket 5',
+            y: 0.91,
+            drilldown: 'Opera'
+        }, ]
+    }],
+    drilldown: {
+        series: [{
+            name: 'IE',
+            id: 'IE',
+            data: [
+                ['v11.0', 24.13],
+                ['v8.0', 17.2],
+                ['v9.0', 8.11],
+                ['v10.0', 5.33],
+                ['v6.0', 1.06],
+                ['v7.0', 0.5]
+            ]
+        }, {
+            name: 'Chrome',
+            id: 'Chrome',
+            data: [
+                ['v40.0', 5],
+                ['v41.0', 4.32],
+                ['v42.0', 3.68],
+                ['v39.0', 2.96],
+                ['v36.0', 2.53],
+                ['v43.0', 1.45],
+                ['v31.0', 1.24],
+                ['v35.0', 0.85],
+                ['v38.0', 0.6],
+                ['v32.0', 0.55],
+                ['v37.0', 0.38],
+                ['v33.0', 0.19],
+                ['v34.0', 0.14],
+                ['v30.0', 0.14]
+            ]
+        }, {
+            name: 'Firefox',
+            id: 'Firefox',
+            data: [
+                ['v35', 2.76],
+                ['v36', 2.32],
+                ['v37', 2.31],
+                ['v34', 1.27],
+                ['v38', 1.02],
+                ['v31', 0.33],
+                ['v33', 0.22],
+                ['v32', 0.15]
+            ]
+        }, {
+            name: 'Safari',
+            id: 'Safari',
+            data: [
+                ['v8.0', 2.56],
+                ['v7.1', 0.77],
+                ['v5.1', 0.42],
+                ['v5.0', 0.3],
+                ['v6.1', 0.29],
+                ['v7.0', 0.26],
+                ['v6.2', 0.17]
+            ]
+        }, {
+            name: 'Opera',
+            id: 'Opera',
+            data: [
+                ['v12.x', 0.34],
+                ['v28', 0.24],
+                ['v27', 0.17],
+                ['v29', 0.16]
+            ]
+        }]
+    }
+});
+
+Highcharts.chart('chart-5', {
+    chart: {
+        type: 'pie'
+    },
+    title: {
+        text: 'Issued Vouchers By Age Group'
+    },
+    plotOptions: {
+        series: {
+            dataLabels: {
+                enabled: true,
+                format: '{point.name}: {point.y:.1f}%'
+            }
+        }
+    },
+
+    tooltip: {
+        headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
+        pointFormat: '<span style="color:{point.color}">{point.name}</span>: <b>{point.y:.2f}%</b> of total<br/>'
+    },
+    series: [{
+        name: 'Age Brackets',
+        colorByPoint: true,
+        data: [{
+            name: '12-17',
+            y: 2,
+            drilldown: 'IE'
+        }, {
+            name: '18-24',
+            y: 4,
+            drilldown: 'Chrome'
+        }, {
+            name: '25-34',
+            y: 14,
+            drilldown: 'Firefox'
+        }, {
+            name: '35-44',
+            y: 5,
+            drilldown: 'Safari'
+        }, {
+            name: '45-54',
+            y: 20,
+            drilldown: 'Opera'
+        },{
+            name: '65+',
+            y: 55,
+            drilldown: 'Opera'
+        } ]
+    }],
+    drilldown: {
+        series: [{
+            name: 'IE',
+            id: 'IE',
+            data: [
+                ['v11.0', 24.13],
+                ['v8.0', 17.2],
+                ['v9.0', 8.11],
+                ['v10.0', 5.33],
+                ['v6.0', 1.06],
+                ['v7.0', 0.5]
+            ]
+        }, {
+            name: 'Chrome',
+            id: 'Chrome',
+            data: [
+                ['v40.0', 5],
+                ['v41.0', 4.32],
+                ['v42.0', 3.68],
+                ['v39.0', 2.96],
+                ['v36.0', 2.53],
+                ['v43.0', 1.45],
+                ['v31.0', 1.24],
+                ['v35.0', 0.85],
+                ['v38.0', 0.6],
+                ['v32.0', 0.55],
+                ['v37.0', 0.38],
+                ['v33.0', 0.19],
+                ['v34.0', 0.14],
+                ['v30.0', 0.14]
+            ]
+        }, {
+            name: 'Firefox',
+            id: 'Firefox',
+            data: [
+                ['v35', 2.76],
+                ['v36', 2.32],
+                ['v37', 2.31],
+                ['v34', 1.27],
+                ['v38', 1.02],
+                ['v31', 0.33],
+                ['v33', 0.22],
+                ['v32', 0.15]
+            ]
+        }, {
+            name: 'Safari',
+            id: 'Safari',
+            data: [
+                ['v8.0', 2.56],
+                ['v7.1', 0.77],
+                ['v5.1', 0.42],
+                ['v5.0', 0.3],
+                ['v6.1', 0.29],
+                ['v7.0', 0.26],
+                ['v6.2', 0.17]
+            ]
+        }, {
+            name: 'Opera',
+            id: 'Opera',
+            data: [
+                ['v12.x', 0.34],
+                ['v28', 0.24],
+                ['v27', 0.17],
+                ['v29', 0.16]
+            ]
+        }]
+    }
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+		})
+
+    </script>
 </head>
 <body>
 	<div>
@@ -271,43 +953,49 @@
 			<h1 style="padding: 0px; margin: 0px; padding-top: 5px; margin-left: 10px; color: white;">Healthcare Rides</h1>
 		</div>
 
-		<div id="vouchers-container" style="margin-top: 40px; float: left;">
-				<table class="table table-dark" style="width: 600px; margin-left: 20px;">
-					<thead style="background-color: #337ab7; color: white;">
-					    <tr>
-					      <th style="text-transform: uppercase; letter-spacing: 2;" scope="col">Voucher Code</th>
-					      <th style="text-transform: uppercase; letter-spacing: 2; scope="col">Appointment Date</th>
-					      <th style="text-transform: uppercase; letter-spacing: 2; scope="col">Status</th>
-					      <th style="text-transform: uppercase; letter-spacing: 2; scope="col">Cost</th>
-					    </tr>
-					  </thead>
-					  <tbody>
-	<!-- 				    <tr>
-					      <th scope="row">1</th>
-					      <td>Mark</td>
-					      <td>Otto</td>
-					      <td>@mdo</td>
-					    </tr>
-					    <tr>
-					      <th scope="row">2</th>
-					      <td>Jacob</td>
-					      <td>Thornton</td>
-					      <td>@fat</td>
-					    </tr>
-					    <tr>
-					      <th scope="row">3</th>
-					      <td>Larry</td>
-					      <td>the Bird</td>
-					      <td>@twitter</td>
-					    </tr>
-	 -->				  </tbody>
-				</table>
+		<button class="btn btn-success" style="float: right; margin-top: -42px; margin-right: 20px;" id="analytics-btn">Analytics</button>
+
+		<div id="voucher-view">
+			<div id="vouchers-container" style="margin-top: 40px; float: left;">
+					<table class="table table-dark" style="width: 600px; margin-left: 20px;">
+						<thead style="background-color: #337ab7; color: white;">
+						    <tr>
+						      <th style="text-transform: uppercase; letter-spacing: 2;" scope="col">Voucher Code</th>
+						      <th style="text-transform: uppercase; letter-spacing: 2; scope="col">Appointment Date</th>
+						      <th style="text-transform: uppercase; letter-spacing: 2; scope="col">Status</th>
+						      <th style="text-transform: uppercase; letter-spacing: 2; scope="col">Cost</th>
+						    </tr>
+						  </thead>
+						<tbody>
+					  	</tbody>
+					</table>
+			</div>
+			<br/><br/>
+			<div style="float: right; height: 550px; margin-left: 20px; margin-top: 0px; margin-right: 50px; width: 700px;">
+				<div id="mapid" style="height: 550px; border: 2px solid #337ab7; width: 700px;">
+				</div>
+
+				<br/><br/>
+				<div style="background-color: #5cb85c; color: white; height: 50px; text-align: center; border: 3px solid black; font-size: 30; width: 340px; display: none;" id="valid-sign">
+					VALID
+				</div>
+				<div style="background-color: red; color: white; height: 50px; text-align: center; border: 3px solid black; font-size: 30; width: 340px; display: none;" id="invalid-sign">
+					DELINQUENT
+				</div>
+			</div>
 		</div>
 
+		<div id="charts-view" style="display: none;">
+			<div id="chart-1" style="min-width: 710px; height: 400px; margin-left: 100px; margin-top: 25px;">
+			</div>
+			<div id="chart-4" style="min-width: 710px; height: 400px; margin-left: 100px; margin-top: 25px;">
+			</div>
+			<div id="chart-2" style="min-width: 710px; height: 400px; margin-left: 100px; margin-top: 25px;">
+			</div>
+			<div id="chart-3" style="min-width: 710px; height: 400px; margin-left: 100px; margin-top: 25px;">
+			</div>
+			<div id="chart-5" style="min-width: 710px; height: 400px; margin-left: 100px; margin-top: 25px;">
+			</div>
 		</div>
-	<div id="mapid" style="float: right; height: 450px; border: 2px solid #337ab7; margin-left: 20px; margin-top: 40px; margin-right: 20px; width: 700px;">
-
 	</div>
-	</div>
-
 </body>

@@ -44,6 +44,11 @@ def create_patient():
     patient.pop('_sa_instance_state')
     return jsonify(patient), 201
 
+# @app.route('/')
+# def static_file(path):
+#     print "antying?"
+#     return app.send_static_file("./profile_pic.jpg")
+
 @app.route('/api/v1/list_vouchers/', methods=['GET'])
 def list_vouchers():
     vouchers_qs = Voucher.query.all()
@@ -65,57 +70,57 @@ def list_vouchers():
 
     return jsonify(vouchers), 200
 
-@app.route('/api/v1/generate_voucher/', methods=['POST'])
-def generate_voucher():
-    patient = Patient.query.filter_by(
-        first_name=request.form['first_name'],
-        last_name=request.form['last_name'],
-        phone_number=request.form['phone_number'],
-    ).first()
+# @app.route('/api/v1/generate_voucher/', methods=['POST'])
+# def generate_voucher():
+#     patient = Patient.query.filter_by(
+#         first_name=request.form['first_name'],
+#         last_name=request.form['last_name'],
+#         phone_number=request.form['phone_number'],
+#     ).first()
 
-    if 'healthcare_facility' in request.form:
-        hcf = HealthcareFacility.query.get(request.form['healthcare_facility'])
-    else:
-        hcf = HealthcareFacility.query.get(1)
+#     if 'healthcare_facility' in request.form:
+#         hcf = HealthcareFacility.query.get(request.form['healthcare_facility'])
+#     else:
+#         hcf = HealthcareFacility.query.get(1)
 
-    if not patient:
-        response = {
-            "message": "Patient does not exist.",
-        }
-        return jsonify(response), 404
+#     if not patient:
+#         response = {
+#             "message": "Patient does not exist.",
+#         }
+#         return jsonify(response), 404
 
-    appt_date = datetime.strptime(request.form['apt_date'], '%m/%d/%Y')
-    appt_date = appt_date.replace(hour=datetime.now().hour, minute=datetime.now().minute)
+#     appt_date = datetime.strptime(request.form['apt_date'], '%m/%d/%Y')
+#     appt_date = appt_date.replace(hour=datetime.now().hour, minute=datetime.now().minute)
 
-    # if appt_date < datetime.now():
-    #     response = {
-    #         "message": "Appointments can't be scheduled in the past.",
-    #     }
-    #     return jsonify(response), 400
+#     # if appt_date < datetime.now():
+#     #     response = {
+#     #         "message": "Appointments can't be scheduled in the past.",
+#     #     }
+#     #     return jsonify(response), 400
 
-    appointment = Appointment(
-        patient=patient,
-        healthcare_facility=hcf,
-        datetime=appt_date,
-        status=statuses.APPOINTMENT_SCHEDULED,
-    )
+#     appointment = Appointment(
+#         patient=patient,
+#         healthcare_facility=hcf,
+#         datetime=appt_date,
+#         status=statuses.APPOINTMENT_SCHEDULED,
+#     )
 
-    db.session.add(appointment)
-    db.session.commit()
+#     db.session.add(appointment)
+#     db.session.commit()
 
-    voucher = Voucher(
-        appointment=appointment,
-        code=generate_voucher_code(),
-        status=statuses.VOUCHER_CREATED,
-    )
+#     voucher = Voucher(
+#         appointment=appointment,
+#         code=generate_voucher_code(),
+#         status=statuses.VOUCHER_CREATED,
+#     )
 
-    db.session.add(voucher)
-    db.session.commit()
+#     db.session.add(voucher)
+#     db.session.commit()
 
-    return jsonify({
-        "message": "Voucher created successfully.",
-        "code": voucher.code,
-    }), 201
+#     return jsonify({
+#         "message": "Voucher created successfully.",
+#         "code": voucher.code,
+#     }), 201
 
 @app.route('/api/v1/appointments/', methods=['GET'])
 def get_appointments():
